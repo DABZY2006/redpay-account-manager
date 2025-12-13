@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -9,22 +10,29 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { toast } from "@/hooks/use-toast";
+import { Loader2 } from "lucide-react";
 
 export function CreateAccountForm() {
+  const navigate = useNavigate();
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [country, setCountry] = useState("nigeria");
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    toast({
-      title: "Account Created",
-      description: "Welcome to REDPAY! Your account has been created successfully.",
-    });
+    setIsLoading(true);
+    
+    // Save username for welcome page
+    localStorage.setItem("username", firstName || "User");
+    
+    // Wait 5 seconds then navigate
+    setTimeout(() => {
+      navigate("/welcome");
+    }, 5000);
   };
 
   return (
@@ -102,8 +110,15 @@ export function CreateAccountForm() {
           </Select>
         </div>
 
-        <Button type="submit" className="mt-2.5 w-full">
-          Create Account
+        <Button type="submit" className="mt-2.5 w-full" disabled={isLoading}>
+          {isLoading ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Creating Account...
+            </>
+          ) : (
+            "Create Account"
+          )}
         </Button>
       </form>
     </div>
