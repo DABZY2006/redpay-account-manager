@@ -1,7 +1,9 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
 const Dashboard = () => {
+  const navigate = useNavigate();
   const [balance, setBalance] = useState(160000);
   const [userId] = useState(() => {
     const stored = localStorage.getItem("rp_userId");
@@ -112,7 +114,10 @@ const Dashboard = () => {
             </div>
             <span className="font-bold opacity-95">RedPay</span>
           </div>
-          <div className="flex h-11 w-11 items-center justify-center rounded-full border border-white/5 bg-primary/10 text-sm font-bold">
+          <div 
+            onClick={() => navigate("/profile")}
+            className="flex h-11 w-11 cursor-pointer items-center justify-center rounded-full border border-white/5 bg-primary/10 text-sm font-bold transition-transform hover:scale-105"
+          >
             {initials}
           </div>
         </div>
