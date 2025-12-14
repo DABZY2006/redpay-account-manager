@@ -20,7 +20,7 @@ const BuyRPC = () => {
   };
 
   const handlePaymentConfirm = () => {
-    navigate("/transaction-failed");
+    navigate("/payment-processing");
   };
 
   return (
