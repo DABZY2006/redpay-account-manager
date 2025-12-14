@@ -143,7 +143,10 @@ const Dashboard = () => {
             >
               🎁 {isClaimed ? countdown : "Claim ₦30,000"}
             </button>
-            <button className="flex-1 rounded-[10px] bg-white/5 px-3 py-2.5 text-sm font-bold text-white">
+            <button 
+              onClick={() => navigate("/withdraw")}
+              className="flex-1 rounded-[10px] bg-white/5 px-3 py-2.5 text-sm font-bold text-white"
+            >
               ✈️ Withdraw
             </button>
           </div>
