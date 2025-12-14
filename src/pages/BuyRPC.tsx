@@ -20,8 +20,7 @@ const BuyRPC = () => {
   };
 
   const handlePaymentConfirm = () => {
-    navigate("/dashboard");
-    toast.info("Payment verification in progress...");
+    navigate("/transaction-failed");
   };
 
   return (
