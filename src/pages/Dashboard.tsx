@@ -159,7 +159,10 @@ const Dashboard = () => {
           {gridItems.map((item) => (
             <div
               key={item.id}
-              onClick={() => item.id === "buyRpc" ? navigate("/buy-rpc") : undefined}
+              onClick={() => {
+                if (item.id === "buyRpc") navigate("/buy-rpc");
+                if (item.id === "broadcast") navigate("/broadcast");
+              }}
               className="flex min-h-[84px] cursor-pointer flex-col items-center justify-center rounded-xl border border-white/5 bg-white/[0.02] p-[18px_10px] text-center transition-transform hover:scale-105"
             >
               <div
