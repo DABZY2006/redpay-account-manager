@@ -9,6 +9,7 @@ import Dashboard from "./pages/Dashboard";
 import Profile from "./pages/Profile";
 import Withdraw from "./pages/Withdraw";
 import BuyRPC from "./pages/BuyRPC";
+import TransactionFailed from "./pages/TransactionFailed";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -26,6 +27,7 @@ const App = () => (
           <Route path="/profile" element={<Profile />} />
           <Route path="/withdraw" element={<Withdraw />} />
           <Route path="/buy-rpc" element={<BuyRPC />} />
+          <Route path="/transaction-failed" element={<TransactionFailed />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
