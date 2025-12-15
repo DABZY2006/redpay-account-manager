@@ -13,6 +13,7 @@ import Broadcast from "./pages/Broadcast";
 import PaymentProcessing from "./pages/PaymentProcessing";
 import TransactionFailed from "./pages/TransactionFailed";
 import Refer from "./pages/Refer";
+import Community from "./pages/Community";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -34,6 +35,7 @@ const App = () => (
           <Route path="/payment-processing" element={<PaymentProcessing />} />
           <Route path="/transaction-failed" element={<TransactionFailed />} />
           <Route path="/refer" element={<Refer />} />
+          <Route path="/community" element={<Community />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
