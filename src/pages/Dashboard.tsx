@@ -165,6 +165,7 @@ const Dashboard = () => {
                 if (item.id === "refer") navigate("/refer");
                 if (item.id === "community") navigate("/community");
                 if (item.id === "support") navigate("/support");
+                if (item.id === "history") navigate("/history");
               }}
               className="flex min-h-[84px] cursor-pointer flex-col items-center justify-center rounded-xl border border-white/5 bg-white/[0.02] p-[18px_10px] text-center transition-transform hover:scale-105"
             >
