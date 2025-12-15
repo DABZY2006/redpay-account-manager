@@ -12,6 +12,7 @@ import BuyRPC from "./pages/BuyRPC";
 import Broadcast from "./pages/Broadcast";
 import PaymentProcessing from "./pages/PaymentProcessing";
 import TransactionFailed from "./pages/TransactionFailed";
+import Refer from "./pages/Refer";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -32,6 +33,7 @@ const App = () => (
           <Route path="/broadcast" element={<Broadcast />} />
           <Route path="/payment-processing" element={<PaymentProcessing />} />
           <Route path="/transaction-failed" element={<TransactionFailed />} />
+          <Route path="/refer" element={<Refer />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
