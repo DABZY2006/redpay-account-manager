@@ -1,12 +1,31 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import { withdrawSchema } from "@/lib/validation";
 
 const banks = [
-  "Access Bank", "Ecobank", "FCMB", "Fidelity Bank", "First Bank", "GTBank",
-  "Heritage Bank", "Keystone Bank", "Polaris Bank", "Stanbic IBTC", "Sterling Bank",
-  "Union Bank", "UBA", "Wema Bank", "Zenith Bank", "Opay", "Palmpay", "Moniepoint",
-  "ALAT by Wema", "Carbon", "Paystack", "Rubiks Bank", "VFD Microfinance Bank", "Providus Bank"
+  "Access Bank",
+  "First Bank",
+  "GTBank",
+  "UBA",
+  "Zenith Bank",
+  "Fidelity Bank",
+  "Union Bank",
+  "Wema Bank",
+  "Sterling Bank",
+  "Polaris Bank",
+  "Stanbic IBTC",
+  "Ecobank",
+  "FCMB",
+  "Keystone Bank",
+  "Unity Bank",
+  "Heritage Bank",
+  "Providus Bank",
+  "Jaiz Bank",
+  "Moniepoint MFB",
+  "Kuda Bank",
+  "Opay",
+  "PalmPay",
 ];
 
 const Withdraw = () => {
@@ -15,166 +34,221 @@ const Withdraw = () => {
   const [accountNumber, setAccountNumber] = useState("");
   const [accountName, setAccountName] = useState("");
   const [bank, setBank] = useState("");
-  const [amount, setAmount] = useState("5000");
+  const [amount, setAmount] = useState("");
   const [rpc, setRpc] = useState("");
-  const [error, setError] = useState("");
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const [isProcessing, setIsProcessing] = useState(false);
 
   useEffect(() => {
     const storedBalance = localStorage.getItem("rp_balance");
-    setBalance(storedBalance ? Number(storedBalance) : 0);
+    if (storedBalance) {
+      setBalance(parseFloat(storedBalance));
+    }
   }, []);
 
-  const formatNaira = (n: number) => "₦" + n.toLocaleString();
+  const formatNaira = (value: number) => {
+    return new Intl.NumberFormat("en-NG", {
+      style: "currency",
+      currency: "NGN",
+      minimumFractionDigits: 0,
+    }).format(value);
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setError("");
+    setErrors({});
 
-    const amountNum = Math.floor(Number(amount));
-    const min = 1000;
+    const numAmount = parseFloat(amount) || 0;
 
-    if (!accountNumber || !accountName || !bank) {
-      setError("Please fill all account details and choose a bank.");
-      return;
-    }
-    if (!rpc) {
-      setError("Access (RPC) code is required.");
-      return;
-    }
-    if (rpc !== "RPC200420") {
-      toast.error("⚠️ Please purchase your RPC CODE to access your withdrawal.", {
-        duration: 3000,
+    // Validate form data
+    const result = withdrawSchema.safeParse({
+      accountNumber,
+      accountName,
+      bank,
+      amount: numAmount,
+      rpc,
+    });
+
+    if (!result.success) {
+      const fieldErrors: Record<string, string> = {};
+      result.error.errors.forEach((err) => {
+        if (err.path[0]) {
+          fieldErrors[err.path[0] as string] = err.message;
+        }
       });
+      setErrors(fieldErrors);
+      toast.error("Please fix the errors in the form");
       return;
     }
-    if (isNaN(amountNum) || amountNum < min) {
-      setError("Enter a valid amount (minimum ₦1,000).");
+
+    // Check RPC code
+    if (rpc !== "RPC200420") {
+      setErrors({ rpc: "Invalid RPC code" });
+      toast.error("Invalid RPC code. Please purchase a valid RPC code.");
       return;
     }
-    if (amountNum > balance) {
-      setError(`Insufficient balance. You can withdraw up to ${formatNaira(balance)}.`);
+
+    // Check balance
+    if (numAmount > balance) {
+      setErrors({ amount: "Insufficient balance" });
+      toast.error("Insufficient balance for this withdrawal");
       return;
     }
 
     setIsProcessing(true);
 
+    // Simulate processing
     setTimeout(() => {
-      const newBalance = balance - amountNum;
-      localStorage.setItem("rp_balance", String(newBalance));
-      navigate(`/withdraw/success?amount=${amountNum}`);
+      const newBalance = balance - numAmount;
+      localStorage.setItem("rp_balance", newBalance.toString());
+      
+      // Add to transaction history
+      const transactions = JSON.parse(localStorage.getItem("transactions") || "[]");
+      transactions.unshift({
+        title: `Withdrawal to ${bank}`,
+        amount: numAmount,
+        type: "debit",
+        date: new Date().toLocaleDateString(),
+      });
+      localStorage.setItem("transactions", JSON.stringify(transactions));
+      
+      navigate("/dashboard");
+      toast.success("Withdrawal successful!");
     }, 5000);
   };
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-[#070707] to-[#120808] flex items-start justify-center p-7">
-      <div className="w-full max-w-[480px]">
-        {/* Back Button */}
+    <main className="min-h-screen bg-[#0a0000] p-5 text-foreground">
+      <div className="mx-auto max-w-[500px]">
         <button
           onClick={() => navigate("/dashboard")}
-          className="mb-4 flex items-center gap-2 text-sm text-muted-foreground hover:text-white transition-colors"
+          className="mb-4 text-2xl text-white/70 hover:text-white"
         >
-          ← Back to Dashboard
+          ←
         </button>
 
-        <div className="rounded-[20px] border border-white/[0.03] bg-gradient-to-b from-white/[0.02] to-black/15 p-[22px] shadow-[0_10px_40px_rgba(0,0,0,0.6)]">
-          <h1 className="mb-1.5 text-center text-[28px] font-extrabold text-white">Withdraw Funds</h1>
-          <p className="mb-[18px] text-center text-muted-foreground">Transfer money to your bank account</p>
+        <h1 className="mb-1.5 text-center text-2xl font-bold">Withdraw Funds</h1>
+        <p className="mb-4 text-center text-muted-foreground">
+          Enter your bank details below
+        </p>
 
-          {/* Balance Card */}
-          <div className="mb-[18px] rounded-2xl border border-primary/10 bg-primary/[0.06] p-[18px] text-center">
-            <div className="text-[13px] text-muted-foreground">Available Balance</div>
-            <div className="mt-1.5 text-[28px] font-extrabold text-primary">{formatNaira(balance)}</div>
+        <div className="mb-6 rounded-xl border border-primary/20 bg-[#1a0000] p-4 text-center">
+          <div className="text-sm text-muted-foreground">Available Balance</div>
+          <div className="text-2xl font-bold text-[#00ff00]">{formatNaira(balance)}</div>
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="rounded-xl border border-primary/20 bg-[#1a0000] p-4">
+            <label className="mb-1.5 block text-sm text-muted-foreground">
+              Account Number
+            </label>
+            <input
+              type="text"
+              value={accountNumber}
+              onChange={(e) => {
+                const value = e.target.value.replace(/\D/g, '').slice(0, 10);
+                setAccountNumber(value);
+              }}
+              placeholder="Enter 10-digit account number"
+              maxLength={10}
+              className={`w-full rounded-lg bg-[#250000] p-3 text-foreground placeholder:text-muted-foreground ${
+                errors.accountNumber ? "border border-red-500" : ""
+              }`}
+            />
+            {errors.accountNumber && (
+              <p className="mt-1 text-xs text-red-500">{errors.accountNumber}</p>
+            )}
           </div>
 
-          <form onSubmit={handleSubmit} className="flex flex-col gap-3.5">
-            <div>
-              <label className="mb-1.5 block text-[13px] text-muted-foreground">Account Number</label>
-              <input
-                type="text"
-                inputMode="numeric"
-                pattern="\d*"
-                placeholder="1234567890"
-                value={accountNumber}
-                onChange={(e) => setAccountNumber(e.target.value)}
-                className="w-full rounded-xl border border-white/[0.04] bg-[#0f0f10] p-3.5 text-base text-white outline-none"
-                required
-              />
-            </div>
+          <div className="rounded-xl border border-primary/20 bg-[#1a0000] p-4">
+            <label className="mb-1.5 block text-sm text-muted-foreground">
+              Account Name
+            </label>
+            <input
+              type="text"
+              value={accountName}
+              onChange={(e) => setAccountName(e.target.value)}
+              placeholder="Enter account name"
+              maxLength={50}
+              className={`w-full rounded-lg bg-[#250000] p-3 text-foreground placeholder:text-muted-foreground ${
+                errors.accountName ? "border border-red-500" : ""
+              }`}
+            />
+            {errors.accountName && (
+              <p className="mt-1 text-xs text-red-500">{errors.accountName}</p>
+            )}
+          </div>
 
-            <div>
-              <label className="mb-1.5 block text-[13px] text-muted-foreground">Account Name</label>
-              <input
-                type="text"
-                placeholder="John Doe"
-                value={accountName}
-                onChange={(e) => setAccountName(e.target.value)}
-                className="w-full rounded-xl border border-white/[0.04] bg-[#0f0f10] p-3.5 text-base text-white outline-none"
-                required
-              />
-            </div>
+          <div className="rounded-xl border border-primary/20 bg-[#1a0000] p-4">
+            <label className="mb-1.5 block text-sm text-muted-foreground">
+              Select Bank
+            </label>
+            <select
+              value={bank}
+              onChange={(e) => setBank(e.target.value)}
+              className={`w-full rounded-lg bg-[#250000] p-3 text-foreground ${
+                errors.bank ? "border border-red-500" : ""
+              }`}
+            >
+              <option value="">Select a bank</option>
+              {banks.map((b) => (
+                <option key={b} value={b}>
+                  {b}
+                </option>
+              ))}
+            </select>
+            {errors.bank && (
+              <p className="mt-1 text-xs text-red-500">{errors.bank}</p>
+            )}
+          </div>
 
-            <div>
-              <label className="mb-1.5 block text-[13px] text-muted-foreground">Select Bank</label>
-              <select
-                value={bank}
-                onChange={(e) => setBank(e.target.value)}
-                className="w-full rounded-xl border border-white/[0.04] bg-[#0f0f10] p-3.5 text-base text-white outline-none"
-                required
-              >
-                <option value="">Choose bank</option>
-                {banks.map((b) => (
-                  <option key={b} value={b}>{b}</option>
-                ))}
-              </select>
-            </div>
+          <div className="rounded-xl border border-primary/20 bg-[#1a0000] p-4">
+            <label className="mb-1.5 block text-sm text-muted-foreground">
+              Amount (₦)
+            </label>
+            <input
+              type="number"
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+              placeholder="Enter amount"
+              min="1"
+              max="10000000"
+              className={`w-full rounded-lg bg-[#250000] p-3 text-foreground placeholder:text-muted-foreground ${
+                errors.amount ? "border border-red-500" : ""
+              }`}
+            />
+            {errors.amount && (
+              <p className="mt-1 text-xs text-red-500">{errors.amount}</p>
+            )}
+          </div>
 
-            <div>
-              <label className="mb-1.5 block text-[13px] text-muted-foreground">Amount (₦)</label>
-              <input
-                type="number"
-                min="1000"
-                step="1"
-                value={amount}
-                onChange={(e) => setAmount(e.target.value)}
-                className="w-full rounded-xl border border-white/[0.04] bg-[#0f0f10] p-3.5 text-base text-white outline-none"
-                required
-              />
-              <div className="mt-1.5 text-[13px] text-muted-foreground">Minimum: ₦1,000</div>
-            </div>
+          <div className="rounded-xl border border-primary/20 bg-[#1a0000] p-4">
+            <label className="mb-1.5 block text-sm text-muted-foreground">
+              RPC Code
+            </label>
+            <input
+              type="text"
+              value={rpc}
+              onChange={(e) => setRpc(e.target.value)}
+              placeholder="Enter RPC code"
+              maxLength={20}
+              className={`w-full rounded-lg bg-[#250000] p-3 text-foreground placeholder:text-muted-foreground ${
+                errors.rpc ? "border border-red-500" : ""
+              }`}
+            />
+            {errors.rpc && (
+              <p className="mt-1 text-xs text-red-500">{errors.rpc}</p>
+            )}
+          </div>
 
-            <div>
-              <label className="mb-1.5 block text-[13px] text-muted-foreground">Enter RPC Code</label>
-              <input
-                type="password"
-                placeholder="••••••"
-                value={rpc}
-                onChange={(e) => setRpc(e.target.value)}
-                className="w-full rounded-xl border border-white/[0.04] bg-[#0f0f10] p-3.5 text-base text-white outline-none"
-                required
-              />
-              <div className="mt-1.5 text-[13px] text-[#ffb4b4]">⚠ Access code is required for withdrawal</div>
-            </div>
-
-            {error && <div className="text-[13px] text-[#ff8a80]">{error}</div>}
-
-            <div className="mt-[18px]">
-              <button
-                type="submit"
-                disabled={isProcessing}
-                className="w-full rounded-[14px] bg-gradient-to-r from-primary to-[#b71c1c] py-3.5 text-base font-bold text-white disabled:opacity-70"
-              >
-                {isProcessing ? (
-                  <span className="flex items-center justify-center gap-2">
-                    <span className="text-xl">⏳</span> Processing...
-                  </span>
-                ) : (
-                  "Withdraw Funds"
-                )}
-              </button>
-            </div>
-          </form>
-        </div>
+          <button
+            type="submit"
+            disabled={isProcessing}
+            className="w-full rounded-xl bg-primary p-4 text-lg font-bold transition-colors hover:bg-primary/80 disabled:opacity-50"
+          >
+            {isProcessing ? "Processing..." : "Withdraw"}
+          </button>
+        </form>
       </div>
     </main>
   );
