@@ -1,87 +1,113 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
+import { broadcastSchema } from "@/lib/validation";
 
 const Broadcast = () => {
   const navigate = useNavigate();
-  const [phoneNumber, setPhoneNumber] = useState("");
+  const [phone, setPhone] = useState("");
   const [amount, setAmount] = useState("");
-  const [rpcCode, setRpcCode] = useState("");
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [isProcessing, setIsProcessing] = useState(false);
 
-  const handlePurchase = () => {
-    navigate("/buy-rpc");
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setErrors({});
+
+    const numAmount = parseFloat(amount) || 0;
+
+    // Validate form data
+    const result = broadcastSchema.safeParse({
+      phone,
+      amount: numAmount,
+    });
+
+    if (!result.success) {
+      const fieldErrors: Record<string, string> = {};
+      result.error.errors.forEach((err) => {
+        if (err.path[0]) {
+          fieldErrors[err.path[0] as string] = err.message;
+        }
+      });
+      setErrors(fieldErrors);
+      toast.error("Please fix the errors in the form");
+      return;
+    }
+
+    setIsProcessing(true);
+
+    // Simulate processing
+    setTimeout(() => {
+      toast.success("Broadcast sent successfully!");
+      setPhone("");
+      setAmount("");
+      setIsProcessing(false);
+    }, 2000);
   };
 
   return (
-    <main className="min-h-screen bg-[#1a0000] p-5 text-foreground">
-      <div className="mx-auto max-w-[420px]">
-        <h1 className="mt-[30px] text-center text-[28px] font-bold">Broadcast</h1>
-        <p className="mb-5 text-center text-muted-foreground">Purchase airtime or data</p>
+    <main className="min-h-screen bg-[#0a0000] p-5 text-foreground">
+      <div className="mx-auto max-w-[500px]">
+        <button
+          onClick={() => navigate("/dashboard")}
+          className="mb-4 text-2xl text-white/70 hover:text-white"
+        >
+          ←
+        </button>
 
-        {/* Balance Box */}
-        <div className="mb-5 rounded-[15px] border-2 border-[#550000] bg-[#330000] p-5 text-center">
-          <span className="mb-2.5 block text-base text-muted-foreground">
-            Purchase your affordable airtime and data at a very cheap price
-          </span>
-        </div>
+        <h1 className="mb-1.5 text-center text-2xl font-bold">Broadcast</h1>
+        <p className="mb-6 text-center text-muted-foreground">
+          Send airtime or data to any phone number
+        </p>
 
-        {/* Toggle Box */}
-        <div className="mb-5 flex justify-center gap-5">
-          <div className="cursor-pointer rounded-[20px] border border-[#550000] bg-[#2a0000] px-[15px] py-[5px] text-lg">
-            Airtime
-          </div>
-        </div>
-
-        {/* Red Icon */}
-        <div className="mb-5 flex justify-center">
-          <div className="flex h-20 w-20 items-center justify-center rounded-full bg-[#550000]">
-            <span className="text-[40px]">📞</span>
-          </div>
-        </div>
-
-        {/* Form */}
-        <div className="space-y-4">
-          <div>
-            <label className="mb-1.5 block text-base">Phone Number</label>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="rounded-xl border border-primary/20 bg-[#1a0000] p-4">
+            <label className="mb-1.5 block text-sm text-muted-foreground">
+              Phone Number
+            </label>
             <input
-              type="number"
-              placeholder="08012345678"
-              value={phoneNumber}
-              onChange={(e) => setPhoneNumber(e.target.value)}
-              className="w-full rounded-[10px] border border-[#550000] bg-[#2a0000] p-3 text-base text-foreground placeholder:text-muted-foreground"
+              type="tel"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              placeholder="+234 or 080..."
+              maxLength={14}
+              className={`w-full rounded-lg bg-[#250000] p-3 text-foreground placeholder:text-muted-foreground ${
+                errors.phone ? "border border-red-500" : ""
+              }`}
             />
+            {errors.phone && (
+              <p className="mt-1 text-xs text-red-500">{errors.phone}</p>
+            )}
           </div>
 
-          <div>
-            <label className="mb-1.5 block text-base">Amount (₦)</label>
+          <div className="rounded-xl border border-primary/20 bg-[#1a0000] p-4">
+            <label className="mb-1.5 block text-sm text-muted-foreground">
+              Amount (₦)
+            </label>
             <input
               type="number"
-              placeholder="1000"
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
-              className="w-full rounded-[10px] border border-[#550000] bg-[#2a0000] p-3 text-base text-foreground placeholder:text-muted-foreground"
+              placeholder="Enter amount"
+              min="1"
+              max="10000000"
+              className={`w-full rounded-lg bg-[#250000] p-3 text-foreground placeholder:text-muted-foreground ${
+                errors.amount ? "border border-red-500" : ""
+              }`}
             />
+            {errors.amount && (
+              <p className="mt-1 text-xs text-red-500">{errors.amount}</p>
+            )}
           </div>
-
-          <div>
-            <label className="mb-1.5 block text-base">Enter RPC Code</label>
-            <input
-              type="password"
-              placeholder="••••••"
-              value={rpcCode}
-              onChange={(e) => setRpcCode(e.target.value)}
-              className="w-full rounded-[10px] border border-[#550000] bg-[#2a0000] p-3 text-base text-foreground placeholder:text-muted-foreground"
-            />
-          </div>
-
-          <p className="text-sm text-yellow-400">⚠ Access code is required to proceed</p>
 
           <button
-            onClick={handlePurchase}
-            className="w-full rounded-xl bg-primary p-[15px] text-lg font-bold text-foreground transition-colors hover:bg-primary/80"
+            type="submit"
+            disabled={isProcessing}
+            className="w-full rounded-xl bg-primary p-4 text-lg font-bold transition-colors hover:bg-primary/80 disabled:opacity-50"
           >
-            Purchase Airtime
+            {isProcessing ? "Processing..." : "Send Broadcast"}
           </button>
-        </div>
+        </form>
       </div>
     </main>
   );
