@@ -36,7 +36,7 @@ const Support = () => {
           <div className="mb-2.5 text-5xl">💬</div>
           <h2 className="mb-2 text-xl font-bold">WhatsApp</h2>
           <p className="mb-4 text-muted-foreground">Message us on WhatsApp</p>
-          <a href="https://wa.me/2348154206173" target="_blank" rel="noopener noreferrer">
+          <a href="https://wa.me/2349129873813" target="_blank" rel="noopener noreferrer">
             <button className="w-full rounded-[10px] bg-[#25D366] px-4 py-3 text-lg font-medium text-white transition-opacity hover:opacity-80">
               Open WhatsApp
             </button>
