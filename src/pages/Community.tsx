@@ -4,7 +4,7 @@ const Community = () => {
   const navigate = useNavigate();
 
   const joinWhatsApp = () => {
-    window.open("https://chat.whatsapp.com/H8qzFTdBbVy6GL1zwXiix2?mode=hqrt2", "_blank");
+    window.open("https://chat.whatsapp.com/CbgASDoMjcYGq0PpG1WJ9h", "_blank");
   };
 
   const joinTelegram = () => {
