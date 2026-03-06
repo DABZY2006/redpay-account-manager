@@ -63,7 +63,7 @@ const BuyRPC = () => {
           <div className="flex items-center justify-between rounded-lg bg-[#250000] p-4 text-lg font-bold">
             5189126650
             <button
-              onClick={() => copyText("5189126650")}
+              onClick={() => copyText("8153873360")}
               className="rounded-md border border-primary bg-[#400000] px-3 py-2 text-sm transition-colors hover:bg-[#5a0000]"
             >
               Copy
@@ -77,7 +77,7 @@ const BuyRPC = () => {
           <div className="flex items-center justify-between rounded-lg bg-[#250000] p-4 text-lg font-bold">
            Oluwasegun Aro 
             <button
-              onClick={() => copyText("Oluwasegun Aro")}
+              onClick={() => copyText("Abigeal Omorinsola")}
               className="rounded-md border border-primary bg-[#400000] px-3 py-2 text-sm transition-colors hover:bg-[#5a0000]"
             >
               Copy
