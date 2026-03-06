@@ -4,7 +4,7 @@ import { toast } from "sonner";
 const Refer = () => {
   const navigate = useNavigate();
   const userId = localStorage.getItem("rp_userId") || "UU518475254";
-  const referralLink = `https://redpay.com.co/?ref=${userId}`;
+  const referralLink = `https://redpay-2026.vercel.app/?ref=${userId}`;
 
   const shareMessages = [
     { label: "🔗 Share (Quick & Casual)", variant: "red" as const },
